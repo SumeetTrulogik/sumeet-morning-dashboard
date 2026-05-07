@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Morning Briefing</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f1117;
+      --surface:   #1a1d27;
+      --border:    #2a2d3a;
+      --accent:    #6c8cf5;
+      --accent-dim:#3a4a8a;
+      --text:      #e2e4f0;
+      --muted:     #6b7094;
+      --success:   #4caf8a;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 24px;
+      gap: 32px;
+    }
+
+    /* ── Header ─────────────────────────────────── */
+    header {
+      text-align: center;
+    }
+
+    header .greeting {
+      font-size: 0.85rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 8px;
+    }
+
+    header .date {
+      font-size: 2.4rem;
+      font-weight: 300;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    header .date span {
+      font-weight: 600;
+    }
+
+    /* ── Quote ───────────────────────────────────── */
+    .quote-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: 10px;
+      padding: 20px 24px;
+      max-width: 640px;
+      width: 100%;
+    }
+
+    .quote-card blockquote {
+      font-size: 1.05rem;
+      font-style: italic;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    .quote-card cite {
+      display: block;
+      margin-top: 10px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-style: normal;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Cards grid ──────────────────────────────── */
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      max-width: 640px;
+      width: 100%;
+    }
+
+    @media (max-width: 520px) {
+      .grid { grid-template-columns: 1fr; }
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px 22px;
+    }
+
+    .card.full { grid-column: 1 / -1; }
+
+    .card-label {
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 14px;
+    }
+
+    /* ── Priorities ──────────────────────────────── */
+    .priority-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .priority-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .priority-num {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-size: 0.72rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .priority-input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.9rem;
+      padding: 4px 2px 6px;
+      outline: none;
+      transition: border-color 0.2s;
+      font-family: inherit;
+    }
+
+    .priority-input::placeholder { color: var(--muted); }
+
+    .priority-input:focus {
+      border-bottom-color: var(--accent);
+    }
+
+    /* ── Notes ───────────────────────────────────── */
+    .notes-area {
+      width: 100%;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      font-size: 0.9rem;
+      font-family: inherit;
+      line-height: 1.65;
+      resize: none;
+      outline: none;
+      min-height: 120px;
+    }
+
+    .notes-area::placeholder { color: var(--muted); }
+
+    /* ── Save indicator ──────────────────────────── */
+    .save-hint {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: right;
+      margin-top: 8px;
+      height: 16px;
+      transition: color 0.3s;
+    }
+
+    .save-hint.saved { color: var(--success); }
+
+    /* ── Footer ──────────────────────────────────── */
+    footer {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <p class="greeting">Good morning</p>
+    <p class="date" id="dateDisplay"></p>
+  </header>
+
+  <!-- Quote -->
+  <div class="quote-card">
+    <blockquote id="quoteText"></blockquote>
+    <cite id="quoteAuthor"></cite>
+  </div>
+
+  <!-- Main content grid -->
+  <div class="grid">
+
+    <!-- Priorities -->
+    <div class="card full">
+      <p class="card-label">Top 3 Priorities</p>
+      <div class="priority-list">
+        <div class="priority-item">
+          <span class="priority-num">1</span>
+          <input class="priority-input" id="p1" type="text" placeholder="Most important task today…" />
+        </div>
+        <div class="priority-item">
+          <span class="priority-num">2</span>
+          <input class="priority-input" id="p2" type="text" placeholder="Second priority…" />
+        </div>
+        <div class="priority-item">
+          <span class="priority-num">3</span>
+          <input class="priority-input" id="p3" type="text" placeholder="Third priority…" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Notes -->
+    <div class="card full">
+      <p class="card-label">Notes</p>
+      <textarea class="notes-area" id="notes" placeholder="Thoughts, reminders, ideas…"></textarea>
+      <p class="save-hint" id="saveHint">Auto-saved</p>
+    </div>
+
+  </div>
+
+  <footer>Refreshes daily &nbsp;·&nbsp; saved locally</footer>
+
+  <script>
+    // ── Date ────────────────────────────────────────
+    const now = new Date();
+    const dayNames = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const monthNames = ['January','February','March','April','May','June',
+                        'July','August','September','October','November','December'];
+    const dayName  = dayNames[now.getDay()];
+    const monthName = monthNames[now.getMonth()];
+    const dayNum   = now.getDate();
+    const year     = now.getFullYear();
+    document.getElementById('dateDisplay').innerHTML =
+      `${dayName}, ${monthName} <span>${dayNum}</span> &mdash; ${year}`;
+
+    // ── Greeting by hour ─────────────────────────────
+    const hour = now.getHours();
+    const greetEl = document.querySelector('.greeting');
+    if (hour >= 12 && hour < 17) greetEl.textContent = 'Good afternoon';
+    else if (hour >= 17)          greetEl.textContent = 'Good evening';
+
+    // ── Daily quote (seeded by day-of-year) ──────────
+    const quotes = [
+      { text: "The secret of getting ahead is getting started.", author: "Mark Twain" },
+      { text: "Do the hard jobs first. The easy jobs will take care of themselves.", author: "Dale Carnegie" },
+      { text: "It is not the mountain we conquer but ourselves.", author: "Edmund Hillary" },
+      { text: "Focus on being productive instead of busy.", author: "Tim Ferriss" },
+      { text: "Your time is limited, so don't waste it living someone else's life.", author: "Steve Jobs" },
+      { text: "The way to get started is to quit talking and begin doing.", author: "Walt Disney" },
+      { text: "Don't watch the clock; do what it does. Keep going.", author: "Sam Levenson" },
+      { text: "You don't have to be great to start, but you have to start to be great.", author: "Zig Ziglar" },
+      { text: "Energy and persistence conquer all things.", author: "Benjamin Franklin" },
+      { text: "Opportunities don't happen. You create them.", author: "Chris Grosser" },
+      { text: "Success is not final, failure is not fatal: it is the courage to continue that counts.", author: "Winston Churchill" },
+      { text: "Believe you can and you're halfway there.", author: "Theodore Roosevelt" },
+      { text: "Act as if what you do makes a difference. It does.", author: "William James" },
+      { text: "What you do today can improve all your tomorrows.", author: "Ralph Marston" },
+      { text: "The future depends on what you do today.", author: "Mahatma Gandhi" },
+      { text: "Hard work beats talent when talent doesn't work hard.", author: "Tim Notke" },
+      { text: "Push yourself, because no one else is going to do it for you.", author: "Unknown" },
+      { text: "Great things never come from comfort zones.", author: "Unknown" },
+      { text: "Dream it. Wish it. Do it.", author: "Unknown" },
+      { text: "Success doesn't just find you. You have to go out and get it.", author: "Unknown" },
+      { text: "The harder you work for something, the greater you'll feel when you achieve it.", author: "Unknown" },
+      { text: "Don't stop when you're tired. Stop when you're done.", author: "Unknown" },
+      { text: "Wake up with determination. Go to bed with satisfaction.", author: "Unknown" },
+      { text: "Little things make big days.", author: "Unknown" },
+      { text: "It's going to be hard, but hard is not impossible.", author: "Unknown" },
+      { text: "Don't wait for opportunity. Create it.", author: "Unknown" },
+      { text: "Sometimes we're tested not to show our weaknesses, but to discover our strengths.", author: "Unknown" },
+      { text: "The key to success is to focus on goals, not obstacles.", author: "Unknown" },
+      { text: "Dream bigger. Do bigger.", author: "Unknown" },
+      { text: "Discipline is choosing between what you want now and what you want most.", author: "Abraham Lincoln" },
+      { text: "You are never too old to set another goal or to dream a new dream.", author: "C.S. Lewis" },
+      { text: "With the new day comes new strength and new thoughts.", author: "Eleanor Roosevelt" },
+    ];
+
+    const startOfYear = new Date(now.getFullYear(), 0, 0);
+    const diff = now - startOfYear;
+    const dayOfYear = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const q = quotes[dayOfYear % quotes.length];
+    document.getElementById('quoteText').textContent   = `"${q.text}"`;
+    document.getElementById('quoteAuthor').textContent = `— ${q.author}`;
+
+    // ── Persist priorities + notes ────────────────────
+    const dateKey = `${year}-${now.getMonth() + 1}-${now.getDate()}`;
+    const STORE_KEY = `mbriefing_${dateKey}`;
+
+    function load() {
+      const raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return;
+      try {
+        const data = JSON.parse(raw);
+        document.getElementById('p1').value    = data.p1 || '';
+        document.getElementById('p2').value    = data.p2 || '';
+        document.getElementById('p3').value    = data.p3 || '';
+        document.getElementById('notes').value = data.notes || '';
+      } catch(e) {}
+    }
+
+    let saveTimer;
+    function scheduleSave() {
+      clearTimeout(saveTimer);
+      saveTimer = setTimeout(save, 600);
+    }
+
+    function save() {
+      const data = {
+        p1:    document.getElementById('p1').value,
+        p2:    document.getElementById('p2').value,
+        p3:    document.getElementById('p3').value,
+        notes: document.getElementById('notes').value,
+      };
+      localStorage.setItem(STORE_KEY, JSON.stringify(data));
+      const hint = document.getElementById('saveHint');
+      hint.textContent = 'Saved';
+      hint.classList.add('saved');
+      setTimeout(() => {
+        hint.textContent = 'Auto-saved';
+        hint.classList.remove('saved');
+      }, 1500);
+    }
+
+    ['p1','p2','p3','notes'].forEach(id =>
+      document.getElementById(id).addEventListener('input', scheduleSave)
+    );
+
+    load();
+  </script>
+</body>
+</html>
