@@ -581,8 +581,11 @@
   updateSliderPreview();
 
   // ── Auth ────────────────────────────────────────────────────
+  // Handle redirect result on page load (fires after Google redirects back)
+  auth.getRedirectResult().catch(() => {});
+
   document.getElementById('signInBtn').addEventListener('click', () => {
-    auth.signInWithPopup(new firebase.auth.GoogleAuthProvider());
+    auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
   });
   document.getElementById('signOutBtn').addEventListener('click', () => auth.signOut());
 
