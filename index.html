@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
   <title>Morning Briefing</title>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -33,56 +32,13 @@
       min-height: 100vh;
     }
 
-    /* ── Auth screen ─────────────────────────── */
-    #auth-screen {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      gap: 20px;
-      padding: 24px;
-      text-align: center;
-    }
-
-    .auth-logo {
-      font-size: 2rem;
-      font-weight: 300;
-      letter-spacing: -0.02em;
-    }
-    .auth-logo span { color: var(--accent); font-weight: 600; }
-
-    .auth-sub {
-      color: var(--muted);
-      font-size: 0.88rem;
-    }
-
-    .btn-google {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      color: var(--text);
-      font-size: 0.95rem;
-      font-family: inherit;
-      padding: 12px 28px;
-      cursor: pointer;
-      transition: border-color 0.2s, background 0.2s;
-      margin-top: 8px;
-    }
-    .btn-google:hover { border-color: var(--accent); background: var(--surface2); }
-
-    /* ── App shell ───────────────────────────── */
     #app {
-      display: none;
+      display: flex;
       flex-direction: column;
       align-items: center;
       padding: 36px 20px 72px;
       gap: 24px;
     }
-    #app.visible { display: flex; }
 
     .inner { width: 100%; max-width: 680px; }
 
@@ -90,7 +46,7 @@
     .topbar {
       display: flex;
       justify-content: space-between;
-      align-items: flex-start;
+      align-items: flex-end;
       width: 100%;
       max-width: 680px;
     }
@@ -109,34 +65,6 @@
       letter-spacing: -0.02em;
     }
     .date-line strong { font-weight: 600; }
-
-    .topbar-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding-top: 4px;
-    }
-
-    .user-avatar {
-      width: 34px;
-      height: 34px;
-      border-radius: 50%;
-      border: 2px solid var(--border);
-      display: none;
-    }
-
-    .btn-signout {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 0.73rem;
-      font-family: inherit;
-      padding: 5px 12px;
-      border-radius: 6px;
-      cursor: pointer;
-      transition: color 0.2s, border-color 0.2s;
-    }
-    .btn-signout:hover { color: var(--text); border-color: var(--muted); }
 
     /* ── Quote ───────────────────────────────── */
     .quote-card {
@@ -159,7 +87,7 @@
       font-style: normal;
     }
 
-    /* ── Section ─────────────────────────────── */
+    /* ── Section headers ─────────────────────── */
     .section-header {
       display: flex;
       justify-content: space-between;
@@ -218,12 +146,8 @@
     .input::placeholder { color: var(--muted); }
     .input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.4); cursor: pointer; }
 
-    /* Slider */
-    .crit-wrap {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
+    /* Criticality slider */
+    .crit-wrap { display: flex; align-items: center; gap: 8px; }
 
     .crit-badge-sm {
       width: 28px;
@@ -271,6 +195,30 @@
       white-space: nowrap;
     }
     .btn-add:hover { background: var(--accent); color: #fff; }
+
+    /* ── Filters ─────────────────────────────── */
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 12px;
+    }
+    .filter-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      color: var(--muted);
+      font-size: 0.7rem;
+      font-family: inherit;
+      padding: 4px 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .filter-btn.active {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
 
     /* ── Task list ───────────────────────────── */
     .task-list { display: flex; flex-direction: column; gap: 8px; }
@@ -324,7 +272,7 @@
       line-height: 1;
       transition: color 0.2s;
     }
-    .btn-icon:hover { color: var(--text); }
+    .btn-icon:hover       { color: var(--text); }
     .btn-icon.check:hover { color: var(--success); }
     .btn-icon.del:hover   { color: var(--red); }
 
@@ -367,61 +315,17 @@
       transition: color 0.3s;
     }
     .save-hint.saved { color: var(--success); }
-
-    /* ── Filters ─────────────────────────────── */
-    .filters {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 12px;
-    }
-    .filter-btn {
-      background: none;
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      color: var(--muted);
-      font-size: 0.7rem;
-      font-family: inherit;
-      padding: 4px 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .filter-btn.active {
-      background: var(--accent-dim);
-      border-color: var(--accent);
-      color: var(--accent);
-    }
   </style>
 </head>
 <body>
 
-<!-- ── Auth screen ───────────────────────────────── -->
-<div id="auth-screen">
-  <div class="auth-logo">Morning <span>Briefing</span></div>
-  <p class="auth-sub">Your personal daily dashboard</p>
-  <button class="btn-google" id="signInBtn">
-    <svg width="18" height="18" viewBox="0 0 48 48" aria-hidden="true">
-      <path fill="#EA4335" d="M24 9.5c3.14 0 5.95 1.08 8.17 2.85l6.08-6.08C34.38 3.09 29.49 1 24 1 14.82 1 7.07 6.48 3.72 14.29l7.1 5.51C12.5 13.83 17.82 9.5 24 9.5z"/>
-      <path fill="#4285F4" d="M46.52 24.5c0-1.64-.15-3.22-.42-4.74H24v8.97h12.66c-.55 2.94-2.2 5.43-4.68 7.1l7.19 5.58C43.15 37.62 46.52 31.55 46.52 24.5z"/>
-      <path fill="#FBBC05" d="M10.82 28.8A14.56 14.56 0 0 1 9.5 24c0-1.67.29-3.28.82-4.8l-7.1-5.51A23.93 23.93 0 0 0 .5 24c0 3.86.92 7.51 2.52 10.74l7.8-5.94z"/>
-      <path fill="#34A853" d="M24 46.5c5.49 0 10.1-1.82 13.47-4.95l-7.19-5.58c-1.99 1.34-4.54 2.13-6.28 2.13-6.18 0-11.5-4.33-13.18-10.3l-7.8 5.94C7.07 41.52 14.82 46.5 24 46.5z"/>
-    </svg>
-    Continue with Google
-  </button>
-</div>
-
-<!-- ── Main app ──────────────────────────────────── -->
 <div id="app">
 
   <!-- Top bar -->
   <div class="topbar">
     <div>
-      <p class="greeting" id="greeting">Good morning</p>
+      <p class="greeting" id="greeting"></p>
       <p class="date-line" id="dateDisplay"></p>
-    </div>
-    <div class="topbar-right">
-      <img class="user-avatar" id="userAvatar" src="" alt="" />
-      <button class="btn-signout" id="signOutBtn">Sign out</button>
     </div>
   </div>
 
@@ -438,7 +342,6 @@
       <span class="task-count" id="taskCount"></span>
     </div>
 
-    <!-- Add form -->
     <div class="add-form">
       <div class="field">
         <label>Description</label>
@@ -460,7 +363,6 @@
       </div>
     </div>
 
-    <!-- Filters -->
     <div class="filters">
       <button class="filter-btn active" data-filter="all">All</button>
       <button class="filter-btn" data-filter="active">Active</button>
@@ -468,9 +370,8 @@
       <button class="filter-btn" data-filter="overdue">Overdue</button>
     </div>
 
-    <!-- List -->
     <div class="task-list" id="taskList">
-      <div class="empty-state">No tasks yet — add one above</div>
+      <div class="empty-state">Loading…</div>
     </div>
   </div>
 
@@ -486,29 +387,36 @@
 </div>
 
 <script>
-  // ── Firebase init ───────────────────────────────────────────
-  const firebaseConfig = {
+  // ── Firebase ────────────────────────────────────────────────
+  firebase.initializeApp({
     apiKey:            "AIzaSyC3RLr1sHybmwL5NCUgP66uAJd_S_gMgpA",
     authDomain:        "sumeet-dashboard-eae49.firebaseapp.com",
     projectId:         "sumeet-dashboard-eae49",
     storageBucket:     "sumeet-dashboard-eae49.firebasestorage.app",
     messagingSenderId: "319906200788",
     appId:             "1:319906200788:web:901fb5651331b1be2f0f41"
+  });
+  const db = firebase.firestore();
+
+  // Fixed paths — no auth needed
+  const TASKS_REF = db.collection('dashboard').doc('main').collection('tasks');
+  const notesDocRef = () => {
+    const d = new Date();
+    return db.collection('dashboard').doc('main')
+             .collection('notes')
+             .doc(`${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()}`);
   };
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db   = firebase.firestore();
 
   // ── Date & greeting ─────────────────────────────────────────
-  const now       = new Date();
+  const now = new Date();
   const DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
   const MON_NAMES = ['January','February','March','April','May','June',
                      'July','August','September','October','November','December'];
   document.getElementById('dateDisplay').innerHTML =
     `${DAY_NAMES[now.getDay()]}, ${MON_NAMES[now.getMonth()]} <strong>${now.getDate()}</strong> &mdash; ${now.getFullYear()}`;
-  const hour = now.getHours();
+  const h = now.getHours();
   document.getElementById('greeting').textContent =
-    hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    h < 12 ? 'Good morning' : h < 17 ? 'Good afternoon' : 'Good evening';
 
   // ── Daily quote ─────────────────────────────────────────────
   const QUOTES = [
@@ -565,77 +473,31 @@
     return '#0a2e18';
   }
 
-  // ── Slider preview ──────────────────────────────────────────
+  // ── Slider ──────────────────────────────────────────────────
   const slider      = document.getElementById('critSlider');
   const critPreview = document.getElementById('critPreview');
   const critLabel   = document.getElementById('critLabel');
 
-  function updateSliderPreview() {
+  function updateSlider() {
     const v = parseInt(slider.value);
     critLabel.textContent        = v;
     critPreview.textContent      = v;
     critPreview.style.background = critBg(v);
     critPreview.style.color      = critColor(v);
   }
-  slider.addEventListener('input', updateSliderPreview);
-  updateSliderPreview();
+  slider.addEventListener('input', updateSlider);
+  updateSlider();
 
-  // ── Auth ────────────────────────────────────────────────────
-  // Handle redirect result on page load (fires after Google redirects back)
-  auth.getRedirectResult().catch(() => {});
-
-  document.getElementById('signInBtn').addEventListener('click', () => {
-    auth.signInWithRedirect(new firebase.auth.GoogleAuthProvider());
-  });
-  document.getElementById('signOutBtn').addEventListener('click', () => auth.signOut());
-
-  let currentUser = null;
-  let unsubTasks  = null;
-  let unsubNotes  = null;
-
-  auth.onAuthStateChanged(user => {
-    currentUser = user;
-    if (user) {
-      document.getElementById('auth-screen').style.display = 'none';
-      document.getElementById('app').classList.add('visible');
-      const av = document.getElementById('userAvatar');
-      if (user.photoURL) { av.src = user.photoURL; av.style.display = 'block'; }
-      subscribeToTasks();
-      loadNotes();
-    } else {
-      document.getElementById('auth-screen').style.display = 'flex';
-      document.getElementById('app').classList.remove('visible');
-      if (unsubTasks) unsubTasks();
-      if (unsubNotes) unsubNotes();
-    }
-  });
-
-  // ── Firestore paths ─────────────────────────────────────────
-  function tasksRef() {
-    return db.collection('users').doc(currentUser.uid).collection('tasks');
-  }
-  function notesRef() {
-    const key = `${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}`;
-    return db.collection('users').doc(currentUser.uid).collection('notes').doc(key);
-  }
-
-  // ── Task state ──────────────────────────────────────────────
-  let allTasks    = [];
+  // ── Tasks ───────────────────────────────────────────────────
+  let allTasks     = [];
   let activeFilter = 'all';
 
-  // ── Subscribe to tasks (real-time) ─────────────────────────
-  function subscribeToTasks() {
-    if (unsubTasks) unsubTasks();
-    unsubTasks = tasksRef()
-      .orderBy('criticality', 'desc')
-      .orderBy('createdAt', 'asc')
-      .onSnapshot(snap => {
-        allTasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-        renderTasks();
-      });
-  }
+  TASKS_REF.orderBy('criticality', 'desc').orderBy('createdAt', 'asc')
+    .onSnapshot(snap => {
+      allTasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderTasks();
+    });
 
-  // ── Add task ────────────────────────────────────────────────
   document.getElementById('addTaskBtn').addEventListener('click', addTask);
   document.getElementById('taskDesc').addEventListener('keydown', e => {
     if (e.key === 'Enter') addTask();
@@ -643,30 +505,26 @@
 
   async function addTask() {
     const desc = document.getElementById('taskDesc').value.trim();
-    if (!desc || !currentUser) return;
-    const crit = parseInt(slider.value);
-    const date = document.getElementById('taskDate').value;
-    await tasksRef().add({
+    if (!desc) return;
+    await TASKS_REF.add({
       description: desc,
-      criticality: crit,
-      targetDate:  date || null,
+      criticality: parseInt(slider.value),
+      targetDate:  document.getElementById('taskDate').value || null,
       done:        false,
       createdAt:   firebase.firestore.FieldValue.serverTimestamp(),
     });
     document.getElementById('taskDesc').value = '';
-    document.getElementById('taskDate').value  = '';
+    document.getElementById('taskDate').value = '';
     slider.value = 5;
-    updateSliderPreview();
+    updateSlider();
   }
 
-  // ── Toggle done ─────────────────────────────────────────────
   async function toggleDone(id, current) {
-    await tasksRef().doc(id).update({ done: !current });
+    await TASKS_REF.doc(id).update({ done: !current });
   }
 
-  // ── Delete task ─────────────────────────────────────────────
   async function deleteTask(id) {
-    await tasksRef().doc(id).delete();
+    await TASKS_REF.doc(id).delete();
   }
 
   // ── Filters ─────────────────────────────────────────────────
@@ -679,6 +537,11 @@
     });
   });
 
+  function todayStr() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  }
+
   function filterTasks(tasks) {
     const today = todayStr();
     if (activeFilter === 'active')  return tasks.filter(t => !t.done);
@@ -687,12 +550,7 @@
     return tasks;
   }
 
-  function todayStr() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  }
-
-  // ── Render tasks ────────────────────────────────────────────
+  // ── Render ──────────────────────────────────────────────────
   function renderTasks() {
     const list    = document.getElementById('taskList');
     const visible = filterTasks(allTasks);
@@ -702,7 +560,7 @@
 
     if (visible.length === 0) {
       list.innerHTML = `<div class="empty-state">${
-        activeFilter === 'all' ? 'No tasks yet — add one above' :
+        activeFilter === 'all'     ? 'No tasks yet — add one above' :
         activeFilter === 'overdue' ? 'No overdue tasks' :
         `No ${activeFilter} tasks`
       }</div>`;
@@ -713,23 +571,17 @@
     list.innerHTML = '';
     visible.forEach(task => {
       const overdue = !task.done && task.targetDate && task.targetDate < today;
-      const dateStr = task.targetDate
-        ? formatDate(task.targetDate, overdue)
-        : '';
       const c = task.criticality || 5;
-
       const el = document.createElement('div');
       el.className = `task-item${task.done ? ' done' : ''}`;
       el.innerHTML = `
         <div class="crit-badge" style="background:${critBg(c)};color:${critColor(c)}">${c}</div>
         <div class="task-body">
           <div class="task-desc">${escHtml(task.description)}</div>
-          ${dateStr ? `<div class="task-meta">${dateStr}</div>` : ''}
+          ${task.targetDate ? `<div class="task-meta">${formatDate(task.targetDate, overdue)}</div>` : ''}
         </div>
         <div class="task-actions">
-          <button class="btn-icon check" title="${task.done ? 'Mark active' : 'Mark done'}">
-            ${task.done ? '↩' : '✓'}
-          </button>
+          <button class="btn-icon check" title="${task.done ? 'Mark active' : 'Mark done'}">${task.done ? '↩' : '✓'}</button>
           <button class="btn-icon del" title="Delete">✕</button>
         </div>`;
       el.querySelector('.check').addEventListener('click', () => toggleDone(task.id, task.done));
@@ -746,38 +598,30 @@
       : `Due ${label}`;
   }
 
-  function escHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
   // ── Notes ───────────────────────────────────────────────────
   let notesSaveTimer;
 
-  function loadNotes() {
-    if (unsubNotes) unsubNotes();
-    unsubNotes = notesRef().onSnapshot(doc => {
-      if (doc.exists) {
-        const area = document.getElementById('notes');
-        if (document.activeElement !== area) {
-          area.value = doc.data().content || '';
-        }
-      }
-    });
-  }
+  notesDocRef().onSnapshot(doc => {
+    const area = document.getElementById('notes');
+    if (doc.exists && document.activeElement !== area) {
+      area.value = doc.data().content || '';
+    }
+  });
 
   document.getElementById('notes').addEventListener('input', () => {
     clearTimeout(notesSaveTimer);
-    notesSaveTimer = setTimeout(saveNotes, 800);
+    notesSaveTimer = setTimeout(async () => {
+      await notesDocRef().set({ content: document.getElementById('notes').value });
+      const hint = document.getElementById('saveHint');
+      hint.textContent = 'Saved ✓';
+      hint.classList.add('saved');
+      setTimeout(() => { hint.textContent = ''; hint.classList.remove('saved'); }, 1800);
+    }, 800);
   });
-
-  async function saveNotes() {
-    if (!currentUser) return;
-    await notesRef().set({ content: document.getElementById('notes').value });
-    const hint = document.getElementById('saveHint');
-    hint.textContent = 'Saved ✓';
-    hint.classList.add('saved');
-    setTimeout(() => { hint.textContent = ''; hint.classList.remove('saved'); }, 1800);
-  }
 </script>
 </body>
 </html>
