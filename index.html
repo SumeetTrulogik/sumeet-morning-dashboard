@@ -492,11 +492,15 @@
   let allTasks     = [];
   let activeFilter = 'all';
 
-  TASKS_REF.orderBy('criticality', 'desc').orderBy('createdAt', 'asc')
-    .onSnapshot(snap => {
-      allTasks = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      renderTasks();
-    });
+  TASKS_REF.orderBy('createdAt', 'desc')
+    .onSnapshot(
+      snap => {
+        allTasks = snap.docs.map(d => ({ id: d.id, ...d.data() }))
+          .sort((a, b) => (b.criticality || 0) - (a.criticality || 0));
+        renderTasks();
+      },
+      err => showError('Failed to load tasks: ' + err.message)
+    );
 
   document.getElementById('addTaskBtn').addEventListener('click', addTask);
   document.getElementById('taskDesc').addEventListener('keydown', e => {
@@ -506,17 +510,32 @@
   async function addTask() {
     const desc = document.getElementById('taskDesc').value.trim();
     if (!desc) return;
-    await TASKS_REF.add({
-      description: desc,
-      criticality: parseInt(slider.value),
-      targetDate:  document.getElementById('taskDate').value || null,
-      done:        false,
-      createdAt:   firebase.firestore.FieldValue.serverTimestamp(),
-    });
-    document.getElementById('taskDesc').value = '';
-    document.getElementById('taskDate').value = '';
-    slider.value = 5;
-    updateSlider();
+    try {
+      await TASKS_REF.add({
+        description: desc,
+        criticality: parseInt(slider.value),
+        targetDate:  document.getElementById('taskDate').value || null,
+        done:        false,
+        createdAt:   firebase.firestore.FieldValue.serverTimestamp(),
+      });
+      document.getElementById('taskDesc').value = '';
+      document.getElementById('taskDate').value = '';
+      slider.value = 5;
+      updateSlider();
+    } catch(err) {
+      showError('Failed to add task: ' + err.message);
+    }
+  }
+
+  function showError(msg) {
+    let el = document.getElementById('errorBanner');
+    if (!el) {
+      el = document.createElement('div');
+      el.id = 'errorBanner';
+      el.style.cssText = 'background:#3a1010;border:1px solid #ef4444;color:#ef4444;padding:10px 16px;border-radius:8px;font-size:0.82rem;margin-bottom:8px;';
+      document.getElementById('taskList').before(el);
+    }
+    el.textContent = msg;
   }
 
   async function toggleDone(id, current) {
